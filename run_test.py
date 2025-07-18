@@ -1,10 +1,3 @@
-#TODO
-#Analyze directional accuracy -> what does it mean on 30 day log predictions
-#create a metrics csv
-#find a better graph of test lstm using same model
-
-
-
 import numpy as np
 import pandas as pd
 import joblib
@@ -23,10 +16,22 @@ from model_train import (
 )
 
 
+def save_predictions_csv(dates, actual, predicted, model_label, filename):
+    df = pd.DataFrame({
+        'date': dates.values,
+        'actual_price': actual,
+        'predicted_price': predicted
+    })
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
+    df.to_csv(filename, index=False)
+    print(f"✅ Saved {model_label} predictions to {filename}")
+
 
 if __name__ == "__main__":
     np.random.seed(42)
     window_size = 90
+
+    os.makedirs("results/plots", exist_ok=True)
 
     # Load data and scalers
     (X_train, y_train, base_train), (X_val, y_val, base_val), actual_date, _, _, df_train, df_val, df_test = load_and_prepare_data()
@@ -45,24 +50,14 @@ if __name__ == "__main__":
     lstm_preds = base_seq_test * np.exp(lstm_preds_log)
     lstm_actual = base_seq_test * np.exp(y_seq_test)
 
-
     mse, r2 = evaluate_model(lstm_preds, lstm_actual, label="LSTM (Test)")
-
     save_metrics_row("LSTM", "test", mse, r2)
 
     start_idx = len(X_train) + len(X_val) + window_size
-    plot_model_results(actual_date, lstm_actual, lstm_preds, "LSTM (Test)", start_idx)
+    plot_model_results(actual_date, lstm_actual, lstm_preds, label="LSTM (Test)", start_idx=start_idx)
 
-    # Save LSTM predictions to CSV
     lstm_dates = actual_date[start_idx: start_idx + len(lstm_preds)]
-    lstm_df = pd.DataFrame({
-        'date': lstm_dates.values,
-        'actual_price': lstm_actual,
-        'predicted_price': lstm_preds
-    })
-    lstm_df.to_csv("lstm_predictions.csv", index=False)
-
-    print("✅ Saved LSTM predictions to results/lstm_predictions.csv")
+    save_predictions_csv(lstm_dates, lstm_actual, lstm_preds, "LSTM", "results/lstm_predictions.csv")
 
 
     # === Linear Regression Evaluation ===
@@ -76,18 +71,8 @@ if __name__ == "__main__":
     mse, r2 = evaluate_model(linear_preds, linear_actual, label="Linear (Test)")
     save_metrics_row("Linear Regression", "test", mse, r2)
 
-
     start_idx = len(X_train) + len(X_val)
-    plot_model_results(actual_date, linear_actual, linear_preds, "Linear (Test)", start_idx)
+    plot_model_results(actual_date, linear_actual, linear_preds, label="Linear (Test)", start_idx=start_idx)
 
-    # Save Linear predictions to CSV
     linear_dates = actual_date[start_idx: start_idx + len(linear_preds)]
-    linear_df = pd.DataFrame({
-        'date': linear_dates.values,
-        'actual_price': linear_actual,
-        'predicted_price': linear_preds
-    })
-    linear_df.to_csv("linear_predictions.csv", index=False)
-    print("✅ Saved Linear predictions to results/linear_predictions.csv")
-
-
+    save_predictions_csv(linear_dates, linear_actual, linear_preds, "Linear Regression", "results/linear_predictions.csv")

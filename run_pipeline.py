@@ -21,7 +21,6 @@ def save_metrics_row(model_name, dataset, mse, r2, filename="results/metrics.csv
         "dataset": dataset,
         "mse": mse,
         "r2_score": r2,
-    
     }
     df = pd.DataFrame([row])
     os.makedirs(os.path.dirname(filename), exist_ok=True)
@@ -29,7 +28,6 @@ def save_metrics_row(model_name, dataset, mse, r2, filename="results/metrics.csv
         df.to_csv(filename, mode='a', header=False, index=False)
     else:
         df.to_csv(filename, index=False)
-
 
 
 def load_and_prepare_data():
@@ -41,7 +39,6 @@ def load_and_prepare_data():
     actual_date = df_clean['date']
     actual_close = df_clean['Close']
     base_close = df_clean['Close'].copy()
-   
 
     df_train, df_val, df_test = split_dataframe(df_clean)
     feature_cols = df_clean.columns.difference(['date', 'target_price', 'Close'])
@@ -61,7 +58,10 @@ def load_and_prepare_data():
 
     return (X_train, y_train, base_train), (X_val, y_val, base_val), actual_date, actual_close, feature_cols, df_train, df_val, df_test
 
+
 def train_and_evaluate_models(X_train, y_train, base_train, X_val, y_val, base_val, actual_date, actual_close):
+    os.makedirs("results/plots", exist_ok=True)
+
     models_to_run = []
 
     print("\n Training LSTM...")
@@ -85,25 +85,29 @@ def train_and_evaluate_models(X_train, y_train, base_train, X_val, y_val, base_v
 
         mse, r2 = evaluate_model(val_preds, y_val_true, label=model_name)
 
-        plot_model_results(actual_date, y_val_true, val_preds, model_name, len(X_train) + window_size)
+        plot_model_results(
+            actual_date, y_val_true, val_preds,
+            label=model_name,
+            start_idx=len(X_train) + window_size
+        )
 
         save_metrics_row(model_name, "validation", mse, r2)
 
 
-
 def plot_model_results(actual_date, actual_prices, predicted_prices, label, start_idx):
-    """
-    Plots predicted vs actual prices on scatter and time series plots,
-    assuming actual_prices and predicted_prices are both aligned future prices.
-    """
-    plot_predicted_vs_actual_prices(actual_prices, predicted_prices, label=label)
-    plot_price_vs_predicted(actual_date, actual_prices, predicted_prices, start_idx, label=label)
-    plot_residuals(actual_prices, predicted_prices, label=label)
+    base = f"results/plots/{label.lower().replace(' ', '_')}_validation"
+
+    plot_predicted_vs_actual_prices(actual_prices, predicted_prices, label=label,
+                                    save_path=f"{base}_scatter.png")
+    plot_price_vs_predicted(actual_date, actual_prices, predicted_prices, start_idx, label=label,
+                            save_path=f"{base}_price_vs_predicted.png")
+    plot_residuals(actual_prices, predicted_prices, label=label,
+                   save_path=f"{base}_residuals.png")
 
 
-def plot_price_vs_predicted(dates, actual_prices, predicted_prices, start_idx, label=""):
+def plot_price_vs_predicted(dates, actual_prices, predicted_prices, start_idx, label="", save_path=None):
     aligned_dates = dates.iloc[start_idx: start_idx + len(predicted_prices)]
-    aligned_actual = actual_prices[:len(predicted_prices)]  
+    aligned_actual = actual_prices[:len(predicted_prices)]
 
     plt.figure(figsize=(12, 5))
     plt.plot(aligned_dates, aligned_actual, label="Actual Price")
@@ -114,10 +118,15 @@ def plot_price_vs_predicted(dates, actual_prices, predicted_prices, start_idx, l
     plt.legend()
     plt.xticks(rotation=45)
     plt.tight_layout()
-    plt.show()
+
+    if save_path:
+        plt.savefig(save_path)
+    else:
+        plt.show()
+    plt.close()
 
 
-def plot_predicted_vs_actual_prices(actual_prices, predicted_prices, label=""):
+def plot_predicted_vs_actual_prices(actual_prices, predicted_prices, label="", save_path=None):
     plt.figure(figsize=(8, 5))
     plt.scatter(actual_prices, predicted_prices, alpha=0.5)
     plt.plot([actual_prices.min(), actual_prices.max()],
@@ -128,9 +137,15 @@ def plot_predicted_vs_actual_prices(actual_prices, predicted_prices, label=""):
     plt.legend()
     plt.grid(True)
     plt.tight_layout()
-    plt.show()
 
-def plot_residuals(y_true, y_pred, label=""):
+    if save_path:
+        plt.savefig(save_path)
+    else:
+        plt.show()
+    plt.close()
+
+
+def plot_residuals(y_true, y_pred, label="", save_path=None):
     residuals = y_pred - y_true
     plt.figure(figsize=(10, 4))
     plt.scatter(y_pred, residuals, alpha=0.5)
@@ -139,10 +154,14 @@ def plot_residuals(y_true, y_pred, label=""):
     plt.ylabel("Residual")
     plt.title(f"Residuals vs Predicted Prices ({label})")
     plt.tight_layout()
-    plt.show()
+
+    if save_path:
+        plt.savefig(save_path)
+    else:
+        plt.show()
+    plt.close()
 
 
 if __name__ == "__main__":
-    (X_train, y_train, base_train), (X_val, y_val, base_val), actual_date, actual_close, _, _, _, _= load_and_prepare_data()
-
+    (X_train, y_train, base_train), (X_val, y_val, base_val), actual_date, actual_close, _, _, _, _ = load_and_prepare_data()
     train_and_evaluate_models(X_train, y_train, base_train, X_val, y_val, base_val, actual_date, actual_close)
