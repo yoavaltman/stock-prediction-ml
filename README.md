@@ -20,12 +20,12 @@ This project compares two approaches for forecasting stock prices: a recurrent n
 ```
 stock-prediction-ml/
 │
+├── StockDataAnalyzer.py   # Downloads OHLCV data and computes technical features 
+├── prepare_data.py        # Cleans and formats raw historical SPY data
+├── split_data.py          # Train/val/test splitting using rolling window
 ├── model_train.py         # Model training logic (LSTM + Linear)
 ├── run_pipeline.py        # Trains models and evaluates on validation set
 ├── run_test.py            # Evaluates trained models on test set
-├── prepare_data.py        # Cleans and formats raw historical SPY data
-├── split_data.py          # Train/val/test splitting using rolling window
-├── StockDataAnalyzer.py   # Data scraping and analysis helper
 │
 ├── models/                # Saved trained models (LSTM .h5, linear .pkl)
 ├── results/
@@ -80,11 +80,10 @@ The `results/` folder will contain evaluation metrics (CSV) and plots for both m
 
 ## Key Observations
 
-- **LSTM** captures non-linear price trends and performs better on volatile segments, but can underpredict large jumps.
-- **Linear Regression** is simpler and more stable but fails to adapt to changing patterns in the data.
+- **LSTM** demonstrated a stronger ability to recognize and adapt to market volatility. Its predictions responded more dynamically to sharp price movements, allowing it to better track swings in both rising and falling markets.
+- **Linear Regression** behaved more like a lagged version of the actual price. Its forecasts were slower to react to turning points, often underestimating or overshooting trends due to its static, linear structure and lack of memory.
 - Both models are evaluated using R² and MSE to measure prediction accuracy on log returns.
 
-This project highlights the limitations of basic ML models in financial forecasting and serves as a starting point for more advanced time series work.
 
 ---
 
