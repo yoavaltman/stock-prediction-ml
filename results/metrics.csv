@@ -1,0 +1,5 @@
+model,dataset,mse,r2_score
+LSTM,validation,663.9792241,0.658777968
+Linear Regression,validation,721.442865,0.773099973
+LSTM,test,1130.622894,0.775462892
+Linear Regression,test,2822.249069,0.541926559
