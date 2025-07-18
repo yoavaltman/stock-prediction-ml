@@ -1,89 +1,93 @@
-
 # Stock Price Prediction Using Machine Learning
 
-This project compares LSTM and linear regression models for forecasting 30-day log returns of the SPY ETF (S&P 500). It includes a full pipeline for data preparation, model training, evaluation, and visualization.
+This project compares two approaches for forecasting stock prices: a recurrent neural network (LSTM) and a traditional linear regression model. The models are trained to predict **30-day log returns** for the SPY ETF using historical closing prices. The goal is to evaluate how each model performs on unseen data using backtest-style evaluation.
 
 ---
 
-## 📈 Overview
+## Overview
 
-- **Objective**: Predict 30-day log returns of SPY using historical price data  
-- **Models Used**:
-  - LSTM (deep learning)
-  - Linear Regression (baseline)
-- **Evaluation Metrics**:
-  - Mean Squared Error (MSE)
-  - R² score
-  - Directional accuracy
-- **Output**: Reconstructed price predictions and performance visualizations
+- **Target**: 30-day log returns of SPY (S&P 500 ETF)
+- **Models**:
+  - LSTM using TensorFlow
+  - Linear Regression using scikit-learn
+- **Evaluation**: R² score and Mean Squared Error (MSE)
+- **Output**: Predicted log returns, reconstructed price predictions, and visualizations
 
 ---
 
-## 🗂 Project Structure
+## Project Structure
 
+```
 stock-prediction-ml/
 │
-├── model_train.py # Training functions for LSTM and Linear Regression
-├── run_pipeline.py # Main pipeline for training, evaluating, and plotting
-├── prepare_data.py # Cleans and prepares SPY historical data
-├── split_data.py # Rolling window split for train/val/test
-├── StockDataAnalyzer.py # Utilities for analyzing stock trends
+├── model_train.py         # Model training logic (LSTM + Linear)
+├── run_pipeline.py        # Trains models and evaluates on validation set
+├── run_test.py            # Evaluates trained models on test set
+├── prepare_data.py        # Cleans and formats raw historical SPY data
+├── split_data.py          # Train/val/test splitting using rolling window
+├── StockDataAnalyzer.py   # Data scraping and analysis helper
 │
-├── models/ # Saved LSTM models (.h5)
-├── results/ # Plots and metric CSVs
-├── requirements.txt # Dependencies
-├── .gitignore # Clean repo configuration
-└── README.md # Project overview (this file)
-
-yaml
-Copy
-Edit
+├── models/                # Saved trained models (LSTM .h5, linear .pkl)
+├── results/
+│   ├── plots/             # All saved evaluation plots
+│   ├── metrics.csv        # R² and MSE scores for each model and dataset
+│   ├── lstm_predictions.csv     # LSTM test predictions
+│   └── linear_predictions.csv   # Linear test predictions
+│
+├── requirements.txt       # Core dependencies
+├── .gitignore             # Prevents committing models/results
+└── README.md              # Project overview
+```
 
 ---
 
-## 🚀 Getting Started
+## How to Use
 
-### 1. Install Dependencies
-```bash
-pip install -r requirements.txt
-2. Run the Pipeline
-bash
-Copy
-Edit
-python run_pipeline.py
-This will:
+1. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-Train both models
+2. Run training & validation pipeline:
+   ```bash
+   python run_pipeline.py
+   ```
 
-Evaluate them on validation and test sets
+3. Run on test set:
+   ```bash
+   python run_test.py
+   ```
 
-Save metrics and plots to the results/ folder
+The `results/` folder will contain evaluation metrics (CSV) and plots for both models on both validation and test data.
 
-📊 Sample Outputs
-Predicted vs Actual Price Plot
+---
 
-Residual Error Plot
+## Sample Output Plots
 
-Directional Accuracy Metrics
+**LSTM: Validation Price vs Prediction**
 
-All outputs saved in the results/ directory.
+![LSTM Val](results/plots/lstm_validation_price_vs_predicted.png)
 
-🧠 Technologies Used
-Python 3.10+
+**Linear Regression: Validation Price vs Prediction**
 
-TensorFlow (for LSTM)
+![LR Val](results/plots/linear_validation_price_vs_predicted.png)
 
-scikit-learn (for linear regression)
+**LSTM: Residuals**
 
-pandas, numpy, matplotlib (for data handling and plotting)
+![LSTM Residuals](results/plots/lstm_validation_residuals.png)
 
-📎 Requirements
-See requirements.txt for a list of core dependencies.
+---
 
-🧑‍💻 Author
-Yoav Altman
-Mathematical Finance student
-Focused on algorithmic trading, time series modeling, and applied machine learning.
+## Key Observations
 
-📄 License
-This project is licensed under the MIT License.
+- **LSTM** captures non-linear price trends and performs better on volatile segments, but can underpredict large jumps.
+- **Linear Regression** is simpler and more stable but fails to adapt to changing patterns in the data.
+- Both models are evaluated using R² and MSE to measure prediction accuracy on log returns.
+
+This project highlights the limitations of basic ML models in financial forecasting and serves as a starting point for more advanced time series work.
+
+---
+
+## License
+
+This project is open-source under the MIT License.
