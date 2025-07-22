@@ -95,7 +95,7 @@ def train_and_evaluate_models(X_train, y_train, base_train, X_val, y_val, base_v
 
 
 def plot_model_results(actual_date, actual_prices, predicted_prices, label, start_idx):
-    base = f"results/plots/{label.lower().replace(' ', '_')}_validation"
+    base = f"results/plots/{label.lower().replace(' ', '_')}"
 
     plot_predicted_vs_actual_prices(actual_prices, predicted_prices, label=label,
                                     save_path=f"{base}_scatter.png")
