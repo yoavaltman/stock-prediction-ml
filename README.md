@@ -66,15 +66,15 @@ The `results/` folder will contain evaluation metrics (CSV) and plots for both m
 
 **LSTM: Validation Price vs Prediction**
 
-![LSTM Val](results/plots/lstm_validation_price_vs_predicted.png)
+![LSTM Val](results/plots/lstm_price_vs_predicted.png)
 
 **Linear Regression: Validation Price vs Prediction**
 
-![LR Val](results/plots/linear_validation_price_vs_predicted.png)
+![LR Val](results/plots/linear_regression_price_vs_predicted.png)
 
 **LSTM: Residuals**
 
-![LSTM Residuals](results/plots/lstm_validation_residuals.png)
+![LSTM Residuals](results/plots/lstm_residuals.png)
 
 ---
 
